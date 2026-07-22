@@ -1,0 +1,61 @@
+.pulse {
+  position: relative;
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.pulse__dot {
+  position: absolute;
+  inset: 4px;
+  border-radius: 50%;
+  background: var(--slate);
+}
+
+.pulse__ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1.5px solid var(--slate);
+  opacity: 0;
+}
+
+/* Online: quick, tight heartbeat */
+.pulse--online .pulse__dot {
+  background: var(--signal-teal);
+}
+.pulse--online .pulse__ring {
+  border-color: var(--signal-teal);
+  animation: pulse-expand 1.8s ease-out infinite;
+}
+.pulse--online .pulse__ring--delay {
+  animation-delay: 0.9s;
+}
+
+/* Offline: slow, faded heartbeat — still alive, just distant */
+.pulse--offline .pulse__dot {
+  background: var(--danger-coral);
+}
+.pulse--offline .pulse__ring {
+  border-color: var(--danger-coral);
+  animation: pulse-expand 3.6s ease-out infinite;
+}
+.pulse--offline .pulse__ring--delay {
+  animation-delay: 1.8s;
+}
+
+/* Never seen: static, no pulse */
+.pulse--never_seen .pulse__ring {
+  display: none;
+}
+
+@keyframes pulse-expand {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(2.1);
+    opacity: 0;
+  }
+}
