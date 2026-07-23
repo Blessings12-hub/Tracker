@@ -29,7 +29,7 @@ export default function Invite() {
 
   return (
     <div style={{ minHeight: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div className="card" style={{ width: 360, textAlign: 'center' }}>
+      <div className="card" style={{ width: '100%', maxWidth: 360, textAlign: 'center' }}>
         <h1 style={{ fontSize: 20, marginBottom: 10 }}>Device invite</h1>
         {status === 'idle' && (
           <>

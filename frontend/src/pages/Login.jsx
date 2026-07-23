@@ -41,8 +41,11 @@ export default function Login() {
         padding: 24,
       }}
     >
-      <form onSubmit={handleSubmit} className="card" style={{ width: 360 }}>
-        <h1 style={{ fontSize: 24, marginBottom: 4 }}>Device Tracker</h1>
+      <form onSubmit={handleSubmit} className="card" style={{ width: '100%', maxWidth: 360 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+          <img src="/logo.png" alt="" style={{ width: 32, height: 32, borderRadius: 8 }} />
+          <h1 style={{ fontSize: 22 }}>Device Tracker</h1>
+        </div>
         <p style={{ color: 'var(--slate)', fontSize: 14, marginTop: 0, marginBottom: 22 }}>
           {mode === 'login' ? 'Sign in to see your devices.' : 'Create an account to get started.'}
         </p>

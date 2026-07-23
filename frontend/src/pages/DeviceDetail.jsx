@@ -1,10 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import { api } from '../api/client.js';
+import { fileToResizedDataUri } from '../utils/image.js';
 import MapView from '../components/MapView.jsx';
 import PulseIndicator from '../components/PulseIndicator.jsx';
 import GeofenceEditor from '../components/GeofenceEditor.jsx';
+import DeviceAvatar from '../components/DeviceAvatar.jsx';
 
 export default function DeviceDetail() {
   const { deviceId } = useParams();
@@ -14,6 +16,8 @@ export default function DeviceDetail() {
   const [geofences, setGeofences] = useState([]);
   const [shares, setShares] = useState([]);
   const [invite, setInvite] = useState(null);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const fileInputRef = useRef(null);
 
   const isOwner = device && user && device.owner_id === user.id;
 
@@ -49,6 +53,27 @@ export default function DeviceDetail() {
     setGeofences((g) => g.filter((x) => x.id !== id));
   }
 
+  async function handlePhotoChange(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingPhoto(true);
+    try {
+      const dataUri = await fileToResizedDataUri(file);
+      await api.setDevicePhoto(token, deviceId, dataUri);
+      setDevice((d) => ({ ...d, photo: dataUri }));
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setUploadingPhoto(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  }
+
+  async function handleRemovePhoto() {
+    await api.setDevicePhoto(token, deviceId, null);
+    setDevice((d) => ({ ...d, photo: null }));
+  }
+
   if (!device) return <div className="page">Loading…</div>;
 
   const currentLocation = device.last_ping?.lat != null
@@ -61,15 +86,16 @@ export default function DeviceDetail() {
         ← Back to dashboard
       </Link>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '14px 0 22px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '14px 0 22px', flexWrap: 'wrap' }}>
+        <DeviceAvatar device={device} size={44} />
+        <h1 style={{ fontSize: 22, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>{device.name}</h1>
         <PulseIndicator status={device.status} lastPingAt={device.last_ping?.created_at} />
-        <h1 style={{ fontSize: 24 }}>{device.name}</h1>
         <span className={`badge ${device.status}`}>{device.status.replace('_', ' ')}</span>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: 20 }}>
+      <div className="split-grid wide-detail">
         <div>
-          <MapView devices={[device]} trail={pings} geofences={geofences} height={420} />
+          <MapView devices={[device]} trail={pings} geofences={geofences} height={320} />
 
           <h2 style={{ fontSize: 16, margin: '24px 0 12px' }}>Zones</h2>
           {isOwner ? (
@@ -87,6 +113,39 @@ export default function DeviceDetail() {
         </div>
 
         <div>
+          {isOwner && (
+            <div className="card" style={{ marginBottom: 16 }}>
+              <h2 style={{ fontSize: 14, marginBottom: 10 }}>Photo</h2>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <DeviceAvatar device={device} size={56} />
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handlePhotoChange}
+                    style={{ display: 'none' }}
+                    id="photo-input"
+                  />
+                  <button
+                    type="button"
+                    className="btn secondary"
+                    style={{ fontSize: 13 }}
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploadingPhoto}
+                  >
+                    {uploadingPhoto ? 'Uploading…' : device.photo ? 'Change photo' : 'Add photo'}
+                  </button>
+                  {device.photo && (
+                    <button type="button" className="btn secondary" style={{ fontSize: 13 }} onClick={handleRemovePhoto}>
+                      Remove
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="card" style={{ marginBottom: 16 }}>
             <h2 style={{ fontSize: 14, marginBottom: 10 }}>Details</h2>
             <div className="mono" style={{ fontSize: 13, color: 'var(--slate)', lineHeight: 1.8 }}>

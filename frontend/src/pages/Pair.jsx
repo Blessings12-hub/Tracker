@@ -22,7 +22,7 @@ export default function Pair() {
 
   return (
     <div style={{ minHeight: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-      <div className="card" style={{ width: 360 }}>
+      <div className="card" style={{ width: '100%', maxWidth: 360 }}>
         <h1 style={{ fontSize: 20, marginBottom: 10 }}>Pair this device</h1>
         {active ? (
           <p style={{ color: 'var(--signal-teal)', fontSize: 14 }}>

@@ -36,18 +36,21 @@ export default function Dashboard() {
     <div className="app-shell">
       <div className="app-main">
         <div className="topbar">
-          <h1>Device Tracker</h1>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-            <span style={{ fontSize: 13, color: 'var(--slate)' }}>{user?.name}</span>
+          <div className="topbar-brand">
+            <img src="/logo.png" alt="" />
+            <h1>Device Tracker</h1>
+          </div>
+          <div className="topbar-actions">
+            <span className="user-name">{user?.name}</span>
             <button className="btn secondary" onClick={logout}>
               Sign out
             </button>
           </div>
         </div>
 
-        <div className="page" style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 20 }}>
+        <div className="page split-grid">
           <div>
-            <MapView devices={allDevices} />
+            <MapView devices={allDevices} height={280} />
 
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', margin: '22px 0 12px' }}>
               <h2 style={{ fontSize: 16 }}>Devices</h2>
