@@ -69,6 +69,18 @@ devicesRouter.delete('/:deviceId', requireOwner, async (req, res) => {
   res.status(204).end();
 });
 
+// Set or clear a device's photo. Owner only. Expects a small base64 data URI —
+// the frontend downsizes the image before sending it, so this stays cheap to
+// store as a column rather than needing separate file storage.
+devicesRouter.post('/:deviceId/photo', requireOwner, async (req, res) => {
+  const { photo } = req.body; // data URI string, or null to remove
+  if (photo && photo.length > 350000) {
+    return res.status(413).json({ error: 'Photo is too large' });
+  }
+  await db.run('UPDATE devices SET photo = $1 WHERE id = $2', [photo || null, req.params.deviceId]);
+  res.json({ ok: true });
+});
+
 // Regenerate a device's API key (e.g. if it leaks). Owner only.
 devicesRouter.post('/:deviceId/rotate-key', requireOwner, async (req, res) => {
   const apiKey = nanoid(32);
