@@ -23,8 +23,9 @@ top of.
 
 1. **Dashboard** (this Vite/React app) — map + list of your devices, alerts,
    zone management, and view-only sharing via invite links.
-2. **Backend API** — stores devices, location pings, geofences, and alerts;
-   runs a scheduled sweep every 5 minutes to flag offline/low-battery devices.
+2. **Backend API** — stores devices, location pings, geofences, and alerts in
+   Postgres; runs a scheduled sweep every 5 minutes to flag offline/low-battery
+   devices.
 3. **Device agent** — each tracked device "checks in" every 5 minutes while
    it's on. For phones, install the frontend as a PWA and open `/pair` on
    that device to start reporting its own location/battery. For laptops, you
@@ -49,15 +50,23 @@ device-tracker/
 
 ### Backend
 
+Needs a Postgres database. Easiest local option is Docker:
+
+```bash
+docker run -d --name tracker-db -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=tracker -p 5432:5432 postgres:16
+```
+
+Then:
+
 ```bash
 cd backend
 npm install
-cp .env.example .env      # edit JWT_SECRET before deploying anywhere real
+cp .env.example .env      # set JWT_SECRET and DATABASE_URL
 npm run dev
 ```
 
-Runs on `http://localhost:4000` and creates `backend/data/tracker.db`
-automatically on first run.
+Runs on `http://localhost:4000` and creates the tables automatically on first
+run (see `src/schema.sql`).
 
 ### Frontend
 
@@ -81,6 +90,29 @@ Runs on `http://localhost:5173`.
 5. Open the device's detail page to draw a zone (geofence) or generate a
    view-only invite link for someone else.
 
+## Deploying
+
+**Backend on Render (free tier)**
+
+1. New → PostgreSQL on Render (free tier) — copy the **Internal Database URL**
+2. New → Web Service → connect this repo → Root Directory: `backend`,
+   Build Command: `npm install`, Start Command: `npm start`, Instance: Free
+3. Environment variables: `JWT_SECRET` (any long random string) and
+   `DATABASE_URL` (the Internal Database URL from step 1)
+
+Note: Render's free web service has an ephemeral filesystem and spins down
+after 15 minutes idle (30–60s cold start on the next request) — using
+Postgres instead of a local SQLite file means your data survives restarts and
+redeploys either way. Render's free Postgres does expire after 30 days,
+though; for anything you want to keep long-term, that's the point to upgrade
+to a paid instance.
+
+**Frontend on Vercel**
+
+Root Directory: `frontend`. Build Command: `npm run build`. Output
+Directory: `dist`. Environment variable `VITE_API_URL` set to your Render
+backend's URL.
+
 ## Pushing to GitHub
 
 ```bash
@@ -97,7 +129,10 @@ git push -u origin main
 
 - **Real**: auth, device registry, manual + invite-link/QR-ready sharing
   (view-only), location history, geofence alerts, offline/low-battery alerts,
-  installable PWA check-in agent.
+  installable PWA check-in agent, per-device photos (stored as a downsized
+  base64 image in Postgres — fine at personal scale; if this ever needs to
+  hold many large images, swap it for object storage like S3/Cloudflare R2
+  instead of growing the database).
 - **Stretch goal, not built here**: pulling live data from Apple's Find My or
   Google's Find My Device. Neither has a public API — doing this means
   relying on unofficial/reverse-engineered endpoints that can break without
