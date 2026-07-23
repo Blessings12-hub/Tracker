@@ -17,6 +17,7 @@
 
 * {
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
 }
 
 html,
@@ -25,12 +26,17 @@ body,
   height: 100%;
 }
 
+html {
+  overflow-x: hidden;
+}
+
 body {
   margin: 0;
   background: var(--ink);
   color: var(--paper);
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 
 h1,
@@ -87,35 +93,97 @@ select {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20px 28px;
+  gap: 12px;
+  padding: 16px 20px;
+  padding-top: max(16px, env(safe-area-inset-top));
   border-bottom: 1px solid var(--ink-line);
+  flex-wrap: wrap;
+}
+
+.topbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.topbar-brand img {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  flex-shrink: 0;
 }
 
 .topbar h1 {
-  font-size: 20px;
+  font-size: 18px;
   letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.topbar-actions .user-name {
+  font-size: 13px;
+  color: var(--slate);
+  max-width: 90px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .page {
-  padding: 28px;
+  padding: 16px;
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
+}
+
+@media (min-width: 640px) {
+  .page {
+    padding: 28px;
+  }
 }
 
 .card {
   background: var(--ink-raised);
   border: 1px solid var(--ink-line);
   border-radius: 14px;
-  padding: 18px;
+  padding: 16px;
+}
+
+/* Two-column layouts (dashboard, device detail) collapse to one column
+   on narrow screens so nothing gets clipped off the right edge. */
+.split-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+@media (min-width: 900px) {
+  .split-grid {
+    grid-template-columns: 1fr 340px;
+    gap: 20px;
+  }
+  .split-grid.wide-detail {
+    grid-template-columns: 1fr 320px;
+  }
 }
 
 .btn {
   border: none;
   border-radius: 10px;
-  padding: 10px 16px;
+  padding: 11px 16px;
   font-weight: 600;
   font-size: 14px;
   background: var(--signal-teal);
   color: var(--ink);
   transition: opacity 0.15s ease;
+  min-height: 40px;
 }
 
 .btn:hover {
@@ -150,9 +218,9 @@ select {
   background: var(--ink);
   border: 1px solid var(--ink-line);
   border-radius: 8px;
-  padding: 10px 12px;
+  padding: 11px 12px;
   color: var(--paper);
-  font-size: 14px;
+  font-size: 16px; /* 16px prevents iOS Safari from auto-zooming on focus */
 }
 
 .badge {
@@ -163,6 +231,7 @@ select {
   padding: 3px 9px;
   border-radius: 999px;
   font-family: var(--font-mono);
+  white-space: nowrap;
 }
 
 .badge.online {
@@ -177,5 +246,32 @@ select {
 
 .badge.never_seen {
   background: rgba(136, 144, 166, 0.12);
+  color: var(--slate);
+}
+
+/* ---- Device avatar (photo or fallback initial) ---- */
+
+.device-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: var(--ink);
+  border: 1px solid var(--ink-line);
+}
+
+.device-avatar-fallback {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  flex-shrink: 0;
+  background: var(--ink);
+  border: 1px solid var(--ink-line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 15px;
   color: var(--slate);
 }
