@@ -20,6 +20,10 @@ export const pool = new Pool({
 export async function initDb() {
   const schema = fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8');
   await pool.query(schema);
+
+  // Lightweight migrations for columns added after the initial deploy —
+  // safe to run every boot since IF NOT EXISTS makes them no-ops once applied.
+  await pool.query('ALTER TABLE devices ADD COLUMN IF NOT EXISTS photo TEXT');
 }
 
 // Small helpers so route files read close to their old sqlite shape.

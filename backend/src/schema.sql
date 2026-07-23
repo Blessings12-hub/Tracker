@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS devices (
   platform TEXT NOT NULL CHECK (platform IN ('apple', 'android', 'web', 'other')),
   device_type TEXT NOT NULL,
   api_key TEXT UNIQUE NOT NULL,
+  photo TEXT, -- small base64 data URI, set via PATCH /devices/:id/photo
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
