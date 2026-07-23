@@ -4,14 +4,13 @@ import { db } from '../db.js';
 import { requireAuth, requireOwner, requireViewAccess } from '../middleware/auth.js';
 
 export const geofencesRouter = Router();
-geofencesRouter.use(requireAuth);
 
-geofencesRouter.get('/devices/:deviceId/geofences', requireViewAccess, async (req, res) => {
+geofencesRouter.get('/devices/:deviceId/geofences', requireAuth, requireViewAccess, async (req, res) => {
   const geofences = await db.all('SELECT * FROM geofences WHERE device_id = $1', [req.params.deviceId]);
   res.json({ geofences });
 });
 
-geofencesRouter.post('/devices/:deviceId/geofences', requireOwner, async (req, res) => {
+geofencesRouter.post('/devices/:deviceId/geofences', requireAuth, requireOwner, async (req, res) => {
   const { name, center_lat, center_lng, radius_m, alert_on } = req.body;
   if (!name || center_lat == null || center_lng == null || !radius_m) {
     return res.status(400).json({ error: 'name, center_lat, center_lng, and radius_m are required' });

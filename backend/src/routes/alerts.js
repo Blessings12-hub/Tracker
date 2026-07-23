@@ -3,10 +3,9 @@ import { db } from '../db.js';
 import { requireAuth, requireViewAccess } from '../middleware/auth.js';
 
 export const alertsRouter = Router();
-alertsRouter.use(requireAuth);
 
 // All unresolved alerts across every device the user can see (dashboard bell icon).
-alertsRouter.get('/alerts', async (req, res) => {
+alertsRouter.get('/alerts', requireAuth, async (req, res) => {
   const alerts = await db.all(
     `SELECT a.*, d.name AS device_name FROM alerts a
      JOIN devices d ON d.id = a.device_id
@@ -24,7 +23,7 @@ alertsRouter.get('/alerts', async (req, res) => {
   res.json({ alerts });
 });
 
-alertsRouter.get('/devices/:deviceId/alerts', requireViewAccess, async (req, res) => {
+alertsRouter.get('/devices/:deviceId/alerts', requireAuth, requireViewAccess, async (req, res) => {
   const alerts = await db.all(
     'SELECT * FROM alerts WHERE device_id = $1 ORDER BY created_at DESC LIMIT 100',
     [req.params.deviceId]
@@ -32,7 +31,7 @@ alertsRouter.get('/devices/:deviceId/alerts', requireViewAccess, async (req, res
   res.json({ alerts });
 });
 
-alertsRouter.post('/alerts/:alertId/resolve', async (req, res) => {
+alertsRouter.post('/alerts/:alertId/resolve', requireAuth, async (req, res) => {
   const alert = await db.get('SELECT * FROM alerts WHERE id = $1', [req.params.alertId]);
   if (!alert) return res.status(404).json({ error: 'Alert not found' });
   const device = await db.get('SELECT * FROM devices WHERE id = $1', [alert.device_id]);

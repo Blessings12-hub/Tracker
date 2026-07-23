@@ -4,11 +4,10 @@ import { db } from '../db.js';
 import { requireAuth, requireOwner } from '../middleware/auth.js';
 
 export const sharesRouter = Router();
-sharesRouter.use(requireAuth);
 
 // Owner creates a view-only invite for a device. Returns a token the frontend
 // turns into a QR code and/or a shareable link (e.g. /invite/:token).
-sharesRouter.post('/devices/:deviceId/shares', requireOwner, async (req, res) => {
+sharesRouter.post('/devices/:deviceId/shares', requireAuth, requireOwner, async (req, res) => {
   const { email } = req.body;
   const id = nanoid();
   const inviteToken = nanoid(24);
@@ -22,7 +21,7 @@ sharesRouter.post('/devices/:deviceId/shares', requireOwner, async (req, res) =>
 });
 
 // List shares (pending + accepted) for a device — owner only.
-sharesRouter.get('/devices/:deviceId/shares', requireOwner, async (req, res) => {
+sharesRouter.get('/devices/:deviceId/shares', requireAuth, requireOwner, async (req, res) => {
   const shares = await db.all(
     'SELECT id, invite_email, accepted_at, created_at FROM device_shares WHERE device_id = $1',
     [req.params.deviceId]
@@ -40,7 +39,7 @@ sharesRouter.delete('/shares/:shareId', requireAuth, async (req, res) => {
 });
 
 // The invited person (already logged in) accepts the invite by token.
-sharesRouter.post('/invite/:token/accept', async (req, res) => {
+sharesRouter.post('/invite/:token/accept', requireAuth, async (req, res) => {
   const share = await db.get('SELECT * FROM device_shares WHERE invite_token = $1', [req.params.token]);
   if (!share) return res.status(404).json({ error: 'Invite not found or already used' });
 
