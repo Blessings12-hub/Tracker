@@ -26,6 +26,8 @@ export const api = {
   getDevice: (token, id) => request(`/devices/${id}`, { token }),
   deleteDevice: (token, id) => request(`/devices/${id}`, { method: 'DELETE', token }),
   rotateKey: (token, id) => request(`/devices/${id}/rotate-key`, { method: 'POST', token }),
+  setDevicePhoto: (token, id, photo) =>
+    request(`/devices/${id}/photo`, { method: 'POST', body: { photo }, token }),
 
   getPings: (token, id, limit = 200) => request(`/devices/${id}/pings?limit=${limit}`, { token }),
 
