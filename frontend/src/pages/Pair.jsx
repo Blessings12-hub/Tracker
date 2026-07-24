@@ -1,11 +1,16 @@
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { startCheckins } from '../agent/checkin.js';
 
 // Open this page on the device you want to track (installed as a PWA on
-// phones for background check-ins) and paste in the api_key shown when the
-// device was added on the dashboard.
+// phones for background check-ins). Scanning the QR code shown after adding
+// a device lands here with the key already filled in — pasting it in by
+// hand still works too, as a fallback.
 export default function Pair() {
-  const [apiKey, setApiKey] = useState(() => localStorage.getItem('tracker_device_key') || '');
+  const [searchParams] = useSearchParams();
+  const [apiKey, setApiKey] = useState(
+    () => searchParams.get('key') || localStorage.getItem('tracker_device_key') || ''
+  );
   const [active, setActive] = useState(false);
 
   useEffect(() => {
@@ -20,6 +25,8 @@ export default function Pair() {
     setActive(true);
   }
 
+  const cameFromScan = Boolean(searchParams.get('key'));
+
   return (
     <div style={{ minHeight: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
       <div className="card" style={{ width: '100%', maxWidth: 360 }}>
@@ -31,7 +38,9 @@ export default function Pair() {
         ) : (
           <form onSubmit={handleStart}>
             <p style={{ color: 'var(--slate)', fontSize: 14, marginTop: 0 }}>
-              Paste the device key shown when this device was added on the dashboard.
+              {cameFromScan
+                ? 'Device key filled in from the QR code. Confirm to start check-ins from this device.'
+                : 'Paste the device key shown when this device was added on the dashboard.'}
             </p>
             <div className="field">
               <label>Device key</label>

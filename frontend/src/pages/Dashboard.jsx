@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { QRCodeSVG } from 'qrcode.react';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useDevices } from '../hooks/useDevices.js';
 import { api } from '../api/client.js';
@@ -64,8 +65,30 @@ export default function Dashboard() {
                 {createdKey ? (
                   <div>
                     <p style={{ fontSize: 14 }}>
-                      Device added. Give this key to the device's PWA/agent so it can check in —
-                      it won't be shown again:
+                      Device added. On the device you want to track, open its camera and scan this
+                      code — it'll open the pairing page with the key already filled in:
+                    </p>
+                    <div
+                      style={{
+                        background: '#fff',
+                        padding: 16,
+                        borderRadius: 12,
+                        display: 'inline-block',
+                        marginBottom: 12,
+                      }}
+                    >
+                      <QRCodeSVG
+                        value={`${window.location.origin}/pair?key=${createdKey}`}
+                        size={180}
+                        fgColor="#12141c"
+                      />
+                    </div>
+                    <p style={{ fontSize: 13, color: 'var(--slate)' }}>
+                      Or paste this key in manually on{' '}
+                      <span className="mono" style={{ color: 'var(--paper)' }}>
+                        /pair
+                      </span>
+                      :
                     </p>
                     <p className="mono" style={{ fontSize: 13, wordBreak: 'break-all', color: 'var(--signal-teal)' }}>
                       {createdKey}
